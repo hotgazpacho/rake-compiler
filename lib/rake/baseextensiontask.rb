@@ -60,6 +60,8 @@ module Rake
           'so'
         when /java/
           'jar'
+        when /dotnet/
+          'dll'
         else
           RbConfig::CONFIG['DLEXT']
       end

@@ -79,6 +79,101 @@ describe Rake::DotNetExtensionTask do
     it 'should default to .NET platform' do
       @ext.platform.should == 'dotnet'
     end
+
+    context '(tasks)' do
+      before :each do
+        Rake.application.clear
+        CLEAN.clear
+        CLOBBER.clear
+      end
+
+      context '(one extension)' do
+        before :each do
+          Rake::FileList.stub!(:[]).and_return(["ext/extension_one/source.cs"])
+          @ext = Rake::DotNetExtensionTask.new('extension_one')
+          @ext_bin = ext_bin('extension_one')
+          @platform = 'dotnet'
+        end
+
+        context 'copy' do
+          it 'should define as task' do
+            Rake::Task.task_defined?('copy').should be_true
+          end
+        end
+
+        context 'compile' do
+          it 'should define as task' do
+            Rake::Task.task_defined?('compile').should be_true
+          end
+
+          it "should depend on 'compile:{platform}'" do
+            Rake::Task['compile'].prerequisites.should include("compile:#{@platform}")
+          end
+        end
+
+        context 'compile:extension_one' do
+          it 'should define as task' do
+            Rake::Task.task_defined?('compile:extension_one').should be_true
+          end
+
+          it "should depend on 'compile:extension_one:{platform}'" do
+            Rake::Task['compile:extension_one'].prerequisites.should include("compile:extension_one:#{@platform}")
+          end
+        end
+
+        context 'lib/extension_one.dll' do
+          it 'should define as task' do
+            Rake::Task.task_defined?("lib/#{@ext_bin}").should be_true
+          end
+
+          it "should depend on 'copy:extension_one:{platform}'" do
+            Rake::Task["lib/#{@ext_bin}"].prerequisites.should include("copy:extension_one:#{@platform}")
+          end
+        end
+
+        context 'tmp/{platform}/extension_one/extension_one.dll' do
+          it 'should define as task' do
+            Rake::Task.task_defined?("tmp/#{@platform}/extension_one/#{@ext_bin}").should be_true
+          end
+
+          it "should depend on checkpoint file" do
+            Rake::Task["tmp/#{@platform}/extension_one/#{@ext_bin}"].prerequisites.should include("tmp/#{@platform}/extension_one/.build")
+          end
+        end
+
+        context 'tmp/{platform}/extension_one/.build' do
+          it 'should define as task' do
+            Rake::Task.task_defined?("tmp/#{@platform}/extension_one/.build").should be_true
+          end
+
+          it 'should depend on source files' do
+            Rake::Task["tmp/#{@platform}/extension_one/.build"].prerequisites.should include("ext/extension_one/source.cs")
+          end
+        end
+
+        context 'clean' do
+          it "should include 'tmp/{platform}/extension_one' in the pattern" do
+            CLEAN.should include("tmp/#{@platform}/extension_one")
+          end
+        end
+
+        context 'clobber' do
+          it "should include 'lib/extension_one.dll'" do
+            CLOBBER.should include("lib/#{@ext_bin}")
+          end
+
+          it "should include 'tmp'" do
+            CLOBBER.should include('tmp')
+          end
+        end
+
+      end
+    end
+  end
+
+  private
+  def ext_bin(extension_name)
+    "#{extension_name}.dll"
   end
 
   def mock_gem_spec(stubs = {})
