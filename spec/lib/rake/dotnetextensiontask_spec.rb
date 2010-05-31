@@ -52,11 +52,36 @@ describe Rake::DotNetExtensionTask do
         end
         ext.platform.should == 'dotnet-128bit'
       end
-
     end
   end
 
-   def mock_gem_spec(stubs = {})
+  context '(default)' do
+    before :each do
+      @ext = Rake::DotNetExtensionTask.new('extension_one')
+    end
+
+    it 'should dump intermediate files to tmp/' do
+      @ext.tmp_dir.should == 'tmp'
+    end
+
+    it 'should copy build extension into lib/' do
+      @ext.lib_dir.should == 'lib'
+    end
+
+    it 'should look for C# files pattern (.cs)' do
+      @ext.source_pattern.should == "**/*.cs"
+    end
+
+    it 'should have no configuration options preset to delegate' do
+      @ext.config_options.should be_empty
+    end
+
+    it 'should default to .NET platform' do
+      @ext.platform.should == 'dotnet'
+    end
+  end
+
+  def mock_gem_spec(stubs = {})
     mock(Gem::Specification,
       { :name => 'my_gem', :platform => 'ruby' }.merge(stubs)
     )

@@ -8,6 +8,7 @@ module Rake
 
     def init(name = nil, gem_spec = nil)
       super
+      @source_pattern = '**/*.cs'
     end
 
     def platform
