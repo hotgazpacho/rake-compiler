@@ -84,6 +84,15 @@ end
 EOF
   end
 
+  def template_rake_extension_csharp_compile(extension_name, gem_spec = nil)
+    <<-EOF
+require 'rake/dotnetextensiontask'
+Rake::DotNetExtensionTask.new("#{extension_name}"#{', SPEC' if gem_spec}) do |ext|
+    #nothing
+end
+EOF    
+  end
+
   def template_extconf(extension_name)
     <<-EOF
 require 'mkmf'
@@ -127,6 +136,22 @@ public class #{camelize(extension_name)}Service implements BasicLibraryService {
 }
 
 EOF
+  end
+
+  def template_source_csharp(extension_name)
+      <<-EOF
+using System;
+using IronRuby.Runtime;
+
+[RubyClass("#{camelize(extension_name)}")]
+public class #{camelize(extension_name)} {
+  [RubyMethod("say_hello")]
+  public void SayHello() {
+    Console.WriteLine("Hello World from extension #{extension_name}");
+  }
+}
+      
+      EOF
   end
 
   def camelize(str)
