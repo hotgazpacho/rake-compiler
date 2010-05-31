@@ -1,4 +1,5 @@
-default:  --tags ~@java --format progress features
+default:  --tags ~@java ~@dotnet --format progress features
 java:     --tags @java  --format progress features
+dotnet:   --tags @dotnet --format progress features
 all:      --format progress features
 autotest: --format progress features

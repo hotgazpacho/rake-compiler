@@ -15,8 +15,13 @@ if defined?(Cucumber)
       t.cucumber_opts = '--format pretty --no-source'
     end
 
+    Cucumber::Rake::Task.new('dotnet', 'Run features testing .NET extension support') do |t|
+      t.profile       = 'dotnet'
+      t.cucumber_opts = '--format pretty --no-source'
+    end
+
     desc 'Run all features'
-    task :all => [:default, :java]
+    task :all => [:default, :java, :dotnet]
   end
   desc 'Alias for cucumber:default'
   task :cucumber => 'cucumber:default'
